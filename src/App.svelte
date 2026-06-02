@@ -1,18 +1,41 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
   import * as THREE from 'three';
   import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-  let canvas;
+  type DroneConfig = {
+    id: string;
+    hex: string;
+    color: number;
+    ax: number; ay: number; az: number;
+    fx: number; fy: number; fz: number;
+    px: number; py: number; pz: number;
+    baseY: number;
+  };
+
+  type DronePosition = {
+    x: number;
+    y: number;
+    z: number;
+  };
+
+  type Drone3D = {
+    mesh: THREE.Mesh;
+    trailGeo: THREE.BufferGeometry;
+    buf: Float32Array;
+    count: number;
+  };
+
+  let canvas: HTMLCanvasElement;
 
   // Reactive HUD data — updated each animation frame
-  let positions = $state([
+  let positions = $state<DronePosition[]>([
     { x: 0, y: 0, z: 0 },
     { x: 0, y: 0, z: 0 },
     { x: 0, y: 0, z: 0 },
   ]);
 
-  const DRONES = [
+  const DRONES: DroneConfig[] = [
     {
       id: 'ALPHA-01', hex: '#00f0ff', color: 0x00f0ff,
       ax: 42, ay: 14, az: 36, fx: 0.37, fy: 0.61, fz: 0.29,
@@ -55,7 +78,8 @@
     scene.add(new THREE.AmbientLight(0x0a1a2a, 4));
 
     // Reference grids — three axis-aligned planes at origin
-    const mkGrid = (size, divs, cx, c) => new THREE.GridHelper(size, divs, cx, c);
+    const mkGrid = (size: number, divs: number, cx: number, c: number): THREE.GridHelper =>
+      new THREE.GridHelper(size, divs, cx, c);
 
     // XZ — floor (horizontal)
     scene.add(mkGrid(240, 48, 0x888888, 0x444444));
@@ -71,7 +95,7 @@
     scene.add(gridYZ);
 
     // Axis lines from origin — brighter so they read over the grids
-    const mkLine = (to, color) => {
+    const mkLine = (to: THREE.Vector3, color: number): THREE.Line => {
       const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), to]);
       return new THREE.Line(g, new THREE.LineBasicMaterial({ color }));
     };
@@ -83,7 +107,7 @@
     const boxGeo = new THREE.BoxGeometry(2.5, 2.5, 2.5);
     const edgeGeo = new THREE.EdgesGeometry(boxGeo);
 
-    const drones3d = DRONES.map((d) => {
+    const drones3d: Drone3D[] = DRONES.map((d) => {
       const mesh = new THREE.Mesh(
         boxGeo,
         new THREE.MeshStandardMaterial({
@@ -113,7 +137,7 @@
       return { mesh, trailGeo, buf, count: 0 };
     });
 
-    const onResize = () => {
+    const onResize = (): void => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -121,13 +145,13 @@
     window.addEventListener('resize', onResize);
 
     const clock = new THREE.Clock();
-    let rafId;
+    let rafId: number;
 
-    const tick = () => {
+    const tick = (): void => {
       rafId = requestAnimationFrame(tick);
       const t = clock.getElapsedTime();
 
-      DRONES.forEach((d, i) => {
+      DRONES.forEach((d: DroneConfig, i: number) => {
         const x = d.ax * Math.sin(t * d.fx + d.px);
         const y = d.baseY + d.ay * Math.cos(t * d.fy + d.py);
         const z = d.az * Math.sin(t * d.fz + d.pz);
@@ -162,7 +186,7 @@
     };
   });
 
-  const fmt = (n) => (n >= 0 ? ' ' : '') + n.toFixed(2);
+  const fmt = (n: number): string => (n >= 0 ? ' ' : '') + n.toFixed(2);
 </script>
 
 <canvas bind:this={canvas}></canvas>
