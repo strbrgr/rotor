@@ -4,13 +4,20 @@ A real-time 3D UAV tracking interface built with Svelte and Three.js. Displays l
 
 ## Stack
 
-- **Frontend** — Svelte + Vite
-- **3D Visualization** — Three.js
-- **Backend** — TBD
+- **`ui/`** — Svelte + Vite + Three.js
+- **`server/`** — Rust (sensor pipeline, gateway, message broker)
 
 ## Development
 
+**UI**
 ```bash
+cd ui
 npm install
 npm run dev
+```
+
+**Server**
+```bash
+cd server
+cargo run --bin gateway
 ```
