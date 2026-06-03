@@ -41,6 +41,50 @@ impl Config {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn args(parts: &[&str]) -> Vec<String> {
+        parts.iter().map(|s| s.to_string()).collect()
+    }
+
+    #[test]
+    fn build_rejects_too_few_args() {
+        assert!(Config::build(&args(&["sensor"])).is_err());
+        assert!(Config::build(&args(&["sensor", "temperature"])).is_err());
+    }
+
+    #[test]
+    fn build_rejects_too_many_args() {
+        assert!(Config::build(&args(&["sensor", "temperature", "5", "extra"])).is_err());
+    }
+
+    #[test]
+    fn build_rejects_invalid_sensor_type() {
+        assert!(matches!(
+            Config::build(&args(&["sensor", "pressure", "5"])),
+            Err("Passed in <sensor_type> is not an option.")
+        ));
+    }
+
+    #[test]
+    fn build_rejects_non_numeric_frequency() {
+        assert!(matches!(
+            Config::build(&args(&["sensor", "temperature", "fast"])),
+            Err("<frequency> needs to be between 0-255.")
+        ));
+    }
+
+    #[test]
+    fn build_rejects_frequency_out_of_range() {
+        assert!(matches!(
+            Config::build(&args(&["sensor", "temperature", "256"])),
+            Err("<frequency> needs to be between 0-255.")
+        ));
+    }
+}
+
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
 
