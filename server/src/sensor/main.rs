@@ -41,6 +41,35 @@ impl Config {
     }
 }
 
+fn main() -> std::io::Result<()> {
+    let args: Vec<String> = env::args().collect();
+
+    let mut config = Config::build(&args).unwrap_or_else(|err| {
+        println!("{err}");
+        exit(1);
+    });
+
+    run(&mut config)?;
+
+    Ok(())
+}
+
+fn run(config: &mut Config) -> std::io::Result<()> {
+    loop {
+        let reading = generate_sensor_reading(&config.sensor_type, config.sensor_id);
+        let json = serde_json::to_vec(&reading)?;
+        let len = json.len() as u32;
+
+        // Send length first
+        config.tcp_stream.write_all(&len.to_be_bytes())?;
+        // send actual content
+        config.tcp_stream.write_all(&json)?;
+
+        let duration = Duration::new(config.frequency as u64, 0);
+        sleep(duration);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -82,34 +111,5 @@ mod tests {
             Config::build(&args(&["sensor", "temperature", "256"])),
             Err("<frequency> needs to be between 0-255.")
         ));
-    }
-}
-
-fn main() -> std::io::Result<()> {
-    let args: Vec<String> = env::args().collect();
-
-    let mut config = Config::build(&args).unwrap_or_else(|err| {
-        println!("{err}");
-        exit(1);
-    });
-
-    run(&mut config)?;
-
-    Ok(())
-}
-
-fn run(config: &mut Config) -> std::io::Result<()> {
-    loop {
-        let reading = generate_sensor_reading(&config.sensor_type, config.sensor_id);
-        let json = serde_json::to_vec(&reading)?;
-        let len = json.len() as u32;
-
-        // Send length first
-        config.tcp_stream.write_all(&len.to_be_bytes())?;
-        // send actual content
-        config.tcp_stream.write_all(&json)?;
-
-        let duration = Duration::new(config.frequency as u64, 0);
-        sleep(duration);
     }
 }

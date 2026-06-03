@@ -24,38 +24,6 @@ impl FromStr for SensorType {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn sensor_type_parses_temperature() {
-        assert!(SensorType::from_str("temperature").is_ok());
-        assert!(SensorType::from_str("Temperature").is_ok());
-        assert!(SensorType::from_str("TEMPERATURE").is_ok());
-        assert!(SensorType::from_str("  temperature  ").is_ok());
-    }
-
-    #[test]
-    fn sensor_type_parses_humidity() {
-        assert!(SensorType::from_str("humidity").is_ok());
-        assert!(SensorType::from_str("Humidity").is_ok());
-        assert!(SensorType::from_str("HUMIDITY").is_ok());
-    }
-
-    #[test]
-    fn sensor_type_rejects_unknown_type() {
-        let result = SensorType::from_str("pressure");
-        assert!(result.is_err());
-        assert_eq!(result.unwrap_err(), "Passed in <sensor_type> is not an option.");
-    }
-
-    #[test]
-    fn sensor_type_rejects_empty_string() {
-        assert!(SensorType::from_str("").is_err());
-    }
-}
-
 pub fn generate_sensor_reading(sensor_type: &SensorType, sensor_id: Uuid) -> SensorReading {
     let ts = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -81,5 +49,40 @@ pub fn generate_sensor_reading(sensor_type: &SensorType, sensor_id: Uuid) -> Sen
             };
             SensorReading::Humidity(reading)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sensor_type_parses_temperature() {
+        assert!(SensorType::from_str("temperature").is_ok());
+        assert!(SensorType::from_str("Temperature").is_ok());
+        assert!(SensorType::from_str("TEMPERATURE").is_ok());
+        assert!(SensorType::from_str("  temperature  ").is_ok());
+    }
+
+    #[test]
+    fn sensor_type_parses_humidity() {
+        assert!(SensorType::from_str("humidity").is_ok());
+        assert!(SensorType::from_str("Humidity").is_ok());
+        assert!(SensorType::from_str("HUMIDITY").is_ok());
+    }
+
+    #[test]
+    fn sensor_type_rejects_unknown_type() {
+        let result = SensorType::from_str("pressure");
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err(),
+            "Passed in <sensor_type> is not an option."
+        );
+    }
+
+    #[test]
+    fn sensor_type_rejects_empty_string() {
+        assert!(SensorType::from_str("").is_err());
     }
 }
