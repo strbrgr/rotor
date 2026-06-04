@@ -1,6 +1,6 @@
 use iggy::prelude::*;
 use questdb::ingress::{Buffer, Sender, TimestampNanos};
-use sensor_scenario::SensorReading;
+use sensor_scenario::UavReading;
 use std::env;
 use std::error::Error;
 use std::time::Duration;
@@ -96,24 +96,16 @@ async fn consume_messages(client: &IggyClient, config: &Config) -> Result<(), Bo
 }
 
 fn handle_message(message: &IggyMessage, sender: &mut Sender) -> Result<(), Box<dyn Error>> {
-    let sensor_reading = serde_json::from_slice::<SensorReading>(&message.payload)?;
+    let reading = serde_json::from_slice::<UavReading>(&message.payload)?;
     let mut buffer = Buffer::new(questdb::ingress::ProtocolVersion::V3);
 
-    match sensor_reading {
-        SensorReading::Temperature(reading) => {
-            buffer
-                .table("temperature")?
-                .symbol("unit", reading.unit)?
-                .column_i64("value", reading.value.into())?
-                .at(TimestampNanos::new(reading.created_at))?;
-        }
-        SensorReading::Humidity(reading) => {
-            buffer
-                .table("humidity")?
-                .column_f64("value", reading.value.into())?
-                .at(TimestampNanos::new(reading.created_at))?;
-        }
-    }
+    buffer
+        .table("uav_position")?
+        .symbol("sensor_id", reading.id.to_string())?
+        .column_f64("x", reading.x.into())?
+        .column_f64("y", reading.y.into())?
+        .column_f64("z", reading.z.into())?
+        .at(TimestampNanos::new(reading.created_at))?;
 
     sender.flush(&mut buffer)?;
 

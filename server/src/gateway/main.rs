@@ -5,7 +5,7 @@ use iggy::prelude::{
     IggyExpiry, IggyMessage, MaxTopicSize, MessageClient, Partitioning, StreamClient, TopicClient,
     UserClient,
 };
-use sensor_scenario::SensorReading;
+use sensor_scenario::UavReading;
 use tokio::{
     io::AsyncReadExt,
     net::{TcpListener, TcpStream},
@@ -156,7 +156,7 @@ async fn handle_client(
         stream.read_exact(&mut buf).await?;
 
         // Validation gate
-        let unvalidated_message = serde_json::from_slice::<SensorReading>(&buf);
+        let unvalidated_message = serde_json::from_slice::<UavReading>(&buf);
         if unvalidated_message.is_err() {
             error!("Message is corrupted.")
             // TODO: publish to DLQ or different topic
