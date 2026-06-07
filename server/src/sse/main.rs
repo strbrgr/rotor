@@ -14,9 +14,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let config = IggyConfig::from_env()?;
     let client = config.connect().await?;
 
-    consume_messages(&client, &config).await;
-
-    Ok(())
+    consume_messages(&client, &config).await
 }
 
 async fn consume_messages(client: &IggyClient, config: &IggyConfig) -> Result<(), Box<dyn Error>> {
