@@ -37,17 +37,17 @@
 
   const DRONES: DroneConfig[] = [
     {
-      id: 'ALPHA-01', hex: '#00f0ff', color: 0x00f0ff,
+      id: 'ALPHA-01', hex: '#d4d4d4', color: 0xd4d4d4,
       ax: 42, ay: 14, az: 36, fx: 0.37, fy: 0.61, fz: 0.29,
       px: 0.0, py: 0.0, pz: 1.0, baseY: 22,
     },
     {
-      id: 'BETA-02', hex: '#ff3cac', color: 0xff3cac,
+      id: 'BETA-02', hex: '#8a8a8a', color: 0x8a8a8a,
       ax: 32, ay: 18, az: 44, fx: 0.53, fy: 0.44, fz: 0.47,
       px: 2.1, py: 1.7, pz: 0.4, baseY: 28,
     },
     {
-      id: 'GAMMA-03', hex: '#39ff14', color: 0x39ff14,
+      id: 'GAMMA-03', hex: '#555555', color: 0x555555,
       ax: 28, ay: 22, az: 33, fx: 0.68, fy: 0.52, fz: 0.73,
       px: 1.2, py: 3.1, pz: 2.3, baseY: 16,
     },
@@ -61,8 +61,8 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x050a0f);
-    scene.fog = new THREE.FogExp2(0x050a0f, 0.007);
+    scene.background = new THREE.Color(0x0a0a0a);
+    scene.fog = new THREE.FogExp2(0x0a0a0a, 0.007);
 
     const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 800);
     camera.position.set(90, 65, 90);
@@ -75,7 +75,7 @@
     controls.maxDistance = 350;
     controls.update();
 
-    scene.add(new THREE.AmbientLight(0x0a1a2a, 4));
+    scene.add(new THREE.AmbientLight(0x888888, 4));
 
     // Reference grids — three axis-aligned planes at origin
     const mkGrid = (size: number, divs: number, cx: number, c: number): THREE.GridHelper =>
@@ -99,9 +99,9 @@
       const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), to]);
       return new THREE.Line(g, new THREE.LineBasicMaterial({ color }));
     };
-    scene.add(mkLine(new THREE.Vector3(70, 0, 0), 0xff3344));  // X — red
-    scene.add(mkLine(new THREE.Vector3(0, 70, 0), 0x33ff77));  // Y — green
-    scene.add(mkLine(new THREE.Vector3(0, 0, 70), 0x3377ff));  // Z — blue
+    scene.add(mkLine(new THREE.Vector3(70, 0, 0), 0xaaaaaa));  // X
+    scene.add(mkLine(new THREE.Vector3(0, 70, 0), 0x888888));  // Y
+    scene.add(mkLine(new THREE.Vector3(0, 0, 70), 0x666666));  // Z
 
     // Shared geometry
     const boxGeo = new THREE.BoxGeometry(2.5, 2.5, 2.5);
@@ -255,7 +255,7 @@
     font-size: 11px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(200, 230, 240, 0.8);
+    color: rgba(200, 200, 200, 0.8);
     z-index: 10;
   }
 
@@ -284,14 +284,14 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
-    background: rgba(5, 12, 20, 0.72);
-    border-bottom: 1px solid rgba(0, 240, 255, 0.14);
+    background: rgba(10, 10, 10, 0.72);
+    border-bottom: 1px solid rgba(180, 180, 180, 0.14);
     backdrop-filter: blur(6px);
   }
 
   .brand {
     font-size: 14px;
-    color: #00f0ff;
+    color: #cccccc;
     letter-spacing: 0.22em;
   }
   .dim { opacity: 0.35; }
@@ -308,7 +308,7 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #44ff88;
+    background: #888888;
     animation: blink 1.6s ease-in-out infinite;
     flex-shrink: 0;
   }
@@ -319,9 +319,9 @@
     font-size: 10px;
     opacity: 0.6;
   }
-  .ax-x { color: #ff4455; }
-  .ax-y { color: #44ff88; }
-  .ax-z { color: #4488ff; }
+  .ax-x { color: #bbbbbb; }
+  .ax-y { color: #888888; }
+  .ax-z { color: #666666; }
 
   /* ─── Drone panel ─── */
   .panel {
@@ -336,15 +336,15 @@
 
   .panel-label {
     font-size: 9px;
-    color: rgba(0, 240, 255, 0.35);
+    color: rgba(180, 180, 180, 0.35);
     letter-spacing: 0.18em;
     padding-bottom: 6px;
-    border-bottom: 1px solid rgba(0, 240, 255, 0.08);
+    border-bottom: 1px solid rgba(180, 180, 180, 0.08);
   }
 
   .card {
-    background: rgba(5, 14, 24, 0.78);
-    border: 1px solid rgba(0, 240, 255, 0.12);
+    background: rgba(10, 10, 10, 0.78);
+    border: 1px solid rgba(180, 180, 180, 0.12);
     border-left: 2px solid var(--c, #00f0ff);
     padding: 10px 12px;
     backdrop-filter: blur(5px);
@@ -370,13 +370,13 @@
   .uav-id {
     flex: 1;
     font-size: 11px;
-    color: rgba(200, 230, 240, 0.9);
+    color: rgba(200, 200, 200, 0.9);
     letter-spacing: 0.12em;
   }
 
   .active-badge {
     font-size: 9px;
-    color: #44ff88;
+    color: #888888;
     letter-spacing: 0.1em;
     animation: blink 2.2s ease-in-out infinite;
   }
@@ -402,7 +402,7 @@
   .val {
     flex: 1;
     text-align: right;
-    color: rgba(220, 240, 250, 0.92);
+    color: rgba(220, 220, 220, 0.92);
     font-variant-numeric: tabular-nums;
     white-space: pre;
   }
@@ -423,7 +423,7 @@
   .corner::after {
     content: '';
     position: absolute;
-    background: rgba(0, 240, 255, 0.45);
+    background: rgba(180, 180, 180, 0.45);
   }
   .corner::before { width: 100%; height: 1px; top: 0; left: 0; }
   .corner::after  { width: 1px; height: 100%; top: 0; left: 0; }
