@@ -1,3 +1,5 @@
+pub mod iggy;
+
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 

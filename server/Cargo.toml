@@ -15,6 +15,10 @@ path = "src/gateway/main.rs"
 name = "writer"
 path = "src/writer/main.rs"
 
+[[bin]]
+name = "sse"
+path = "src/sse/main.rs"
+
 [dependencies]
 chrono = "0.4.44"
 dotenvy = "0.15"
