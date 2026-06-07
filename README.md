@@ -102,8 +102,8 @@ npm run dev
 # 1. Gateway — listens on 127.0.0.1:8080 for producers, forwards to Iggy
 cargo run --bin gateway
 
-# 2. Consumer — polls the Iggy topic and writes to QuestDB
-cargo run --bin consumer
+# 2. Writer — polls the Iggy topic and writes to QuestDB
+cargo run --bin writer
 
 # 3. Sensor — connects to the gateway and emits UAV position readings
 # Usage: sensor <frequency_seconds>

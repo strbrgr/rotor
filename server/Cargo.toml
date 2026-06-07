@@ -12,8 +12,8 @@ name = "gateway"
 path = "src/gateway/main.rs"
 
 [[bin]]
-name = "consumer"
-path = "src/consumer/main.rs"
+name = "writer"
+path = "src/writer/main.rs"
 
 [dependencies]
 chrono = "0.4.44"
