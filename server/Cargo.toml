@@ -16,8 +16,8 @@ name = "writer"
 path = "src/writer/main.rs"
 
 [[bin]]
-name = "ws"
-path = "src/ws/main.rs"
+name = "sse"
+path = "src/sse/main.rs"
 
 [dependencies]
 chrono = "0.4.44"
