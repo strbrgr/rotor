@@ -115,9 +115,9 @@ cargo run --bin writer
 cargo run --bin sse
 
 # 4. Sensor(s) — each instance connects to the gateway and emits readings
-# Usage: sensor <frequency_seconds>
-cargo run --bin sensor 5
-cargo run --bin sensor 3
+# Usage: sensor <frequency_ms>
+cargo run --bin sensor 100
+cargo run --bin sensor 150
 ```
 
 The gateway batches every 10 readings into a single Iggy publish. Each sensor spawns with a unique UUID that identifies its readings for the lifetime of the process.
