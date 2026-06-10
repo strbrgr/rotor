@@ -1,6 +1,6 @@
 use iggy::prelude::*;
 use questdb::ingress::{Buffer, Sender, TimestampNanos};
-use sensor_scenario::UavReading;
+use sensor_scenario::{UavReading, iggy::IggyConfig};
 use std::env;
 use std::error::Error;
 use std::time::Duration;
@@ -8,29 +8,14 @@ use tokio::time::sleep;
 use tracing::info;
 
 struct Config {
-    root_username: String,
-    root_password: String,
-    stream_name: String,
-    topic_name: String,
-    partition_id: u32,
+    iggy: IggyConfig,
     qdb_client_conf: String,
 }
 
 impl Config {
     fn from_env() -> Result<Self, Box<dyn Error>> {
         Ok(Self {
-            root_username: env::var("IGGY_ROOT_USERNAME")
-                .unwrap_or_else(|_| DEFAULT_ROOT_USERNAME.to_string()),
-            root_password: env::var("IGGY_ROOT_PASSWORD")
-                .map_err(|_| "IGGY_ROOT_PASSWORD must be set (see .env)")?,
-            stream_name: env::var("IGGY_STREAM_NAME")
-                .map_err(|_| "IGGY_STREAM_NAME must be set (see .env)")?,
-            topic_name: env::var("IGGY_TOPIC_NAME")
-                .map_err(|_| "IGGY_TOPIC_NAME must be set (see .env)")?,
-            partition_id: env::var("IGGY_PARTITION_ID")
-                .map_err(|_| "IGGY_PARTITION_ID must be set (see .env)")?
-                .parse::<u32>()
-                .map_err(|_| "IGGY_PARTITION_ID must be a valid u32")?,
+            iggy: IggyConfig::from_env()?,
             qdb_client_conf: env::var("QDB_CLIENT_CONF")
                 .map_err(|_| "QDB_CLIENT_CONF must be set (see .env)")?,
         })
@@ -43,11 +28,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tracing_subscriber::fmt::init();
 
     let config = Config::from_env()?;
-    let client = IggyClient::default();
-    client.connect().await?;
-    client
-        .login_user(&config.root_username, &config.root_password)
-        .await?;
+    let client = config.iggy.connect().await?;
     consume_messages(&client, &config).await
 }
 
@@ -55,14 +36,14 @@ async fn consume_messages(client: &IggyClient, config: &Config) -> Result<(), Bo
     let interval = Duration::from_millis(500);
     info!(
         "Messages will be consumed from stream: {}, topic: {}, partition: {} with interval {} ms.",
-        config.stream_name,
-        config.topic_name,
-        config.partition_id,
+        config.iggy.stream_name,
+        config.iggy.topic_name,
+        config.iggy.partition_id,
         interval.as_millis()
     );
 
-    let stream_id = Identifier::try_from(config.stream_name.as_str())?;
-    let topic_id = Identifier::try_from(config.topic_name.as_str())?;
+    let stream_id = Identifier::try_from(config.iggy.stream_name.as_str())?;
+    let topic_id = Identifier::try_from(config.iggy.topic_name.as_str())?;
     let mut offset = 0;
     let messages_per_batch = 10;
     let consumer = Consumer::default();
@@ -73,7 +54,7 @@ async fn consume_messages(client: &IggyClient, config: &Config) -> Result<(), Bo
             .poll_messages(
                 &stream_id,
                 &topic_id,
-                Some(config.partition_id),
+                Some(config.iggy.partition_id),
                 &consumer,
                 &PollingStrategy::offset(offset),
                 messages_per_batch,
