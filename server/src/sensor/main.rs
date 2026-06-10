@@ -8,7 +8,7 @@ use std::{
 pub mod reading;
 
 struct Config {
-    frequency: u8,
+    frequency_ms: u32,
     tcp_stream: TcpStream,
     sensor_id: Uuid,
 }
@@ -17,20 +17,20 @@ impl Config {
     pub fn build(args: &[String]) -> Result<Config, &'static str> {
         match args.len() {
             2 => {
-                let frequency = args[1]
-                    .parse::<u8>()
-                    .map_err(|_| "<frequency> needs to be between 0-255.")?;
+                let frequency_ms = args[1]
+                    .parse::<u32>()
+                    .map_err(|_| "<frequency_ms> must be a positive integer (milliseconds).")?;
 
                 let tcp_stream =
                     TcpStream::connect("127.0.0.1:8080").map_err(|_| "Error connecting via Tcp")?;
 
                 Ok(Config {
-                    frequency,
+                    frequency_ms,
                     tcp_stream,
                     sensor_id: Uuid::new_v4(),
                 })
             }
-            _ => Err("Usage: <frequency>"),
+            _ => Err("Usage: sensor <frequency_ms>"),
         }
     }
 }
@@ -57,8 +57,7 @@ fn run(config: &mut Config) -> std::io::Result<()> {
         config.tcp_stream.write_all(&len.to_be_bytes())?;
         config.tcp_stream.write_all(&json)?;
 
-        let duration = Duration::new(config.frequency as u64, 0);
-        sleep(duration);
+        sleep(Duration::from_millis(config.frequency_ms as u64));
     }
 }
 
@@ -84,15 +83,15 @@ mod tests {
     fn build_rejects_non_numeric_frequency() {
         assert!(matches!(
             Config::build(&args(&["sensor", "fast"])),
-            Err("<frequency> needs to be between 0-255.")
+            Err("<frequency_ms> must be a positive integer (milliseconds).")
         ));
     }
 
     #[test]
-    fn build_rejects_frequency_out_of_range() {
+    fn build_rejects_negative_frequency() {
         assert!(matches!(
-            Config::build(&args(&["sensor", "256"])),
-            Err("<frequency> needs to be between 0-255.")
+            Config::build(&args(&["sensor", "-1"])),
+            Err("<frequency_ms> must be a positive integer (milliseconds).")
         ));
     }
 }

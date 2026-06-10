@@ -10,6 +10,7 @@ use std::{convert::Infallible, error::Error, sync::Arc, time::Duration};
 use tokio::sync::broadcast;
 use tokio::time::sleep;
 use tokio_stream::{StreamExt, wrappers::BroadcastStream};
+use tower_http::cors::CorsLayer;
 use tracing::{error, info};
 
 #[derive(Clone)]
@@ -32,6 +33,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let app = Router::new()
         .route("/events", get(sse_handler))
+        .layer(CorsLayer::permissive())
         .with_state(AppState { tx });
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3001").await?;
@@ -68,7 +70,7 @@ async fn consume_messages(
     config: IggyConfig,
     tx: Arc<broadcast::Sender<UavReading>>,
 ) {
-    let interval = Duration::from_millis(500);
+    let interval = Duration::from_millis(100);
     info!(
         "Consuming from stream: {}, topic: {}, partition: {}",
         config.stream_name, config.topic_name, config.partition_id,
