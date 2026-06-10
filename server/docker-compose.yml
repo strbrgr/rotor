@@ -10,7 +10,6 @@ services:
       IGGY_WEBSOCKET_ADDRESS: "0.0.0.0:8092"
       IGGY_ROOT_USERNAME: ${IGGY_ROOT_USERNAME}
       IGGY_ROOT_PASSWORD: ${IGGY_ROOT_PASSWORD}
-      QDB_CLIENT_CONF: ${QDB_CLIENT_CONF}
     ports:
       - "3000:3000"   # HTTP API
       - "8090:8090"   # TCP transport (iggy client default)
@@ -27,24 +26,10 @@ services:
     volumes:
       - questdb-data:/var/lib/questdb
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - "3001:3000"
-    environment:
-      GF_SECURITY_ADMIN_PASSWORD: admin
-    volumes:
-      - grafana-data:/var/lib/grafana
-    depends_on:
-      - questdb
-
 volumes:
   iggy-server:
     driver: local
   questdb-data:
-    driver: local
-  grafana-data:
     driver: local
 
 networks:
