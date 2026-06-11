@@ -135,7 +135,7 @@ async fn handle_client(
         duration.as_human_time_string()
     );
 
-    let messages_per_batch = 10;
+    let messages_per_batch = 1;
     let partitioning = Partitioning::partition_id(config.partition_id);
     let mut messages = Vec::new();
 

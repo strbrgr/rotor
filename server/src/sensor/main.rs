@@ -2,13 +2,13 @@ use uuid::Uuid;
 
 use crate::reading::generate_uav_reading;
 use std::{
-    env, io::Write, net::TcpStream, process::exit, thread::sleep, time::Duration,
+    env, f32::consts::TAU, io::Write, net::TcpStream, process::exit, thread::sleep, time::Duration,
 };
 
 pub mod reading;
 
 struct Config {
-    frequency: u8,
+    frequency_ms: u32,
     tcp_stream: TcpStream,
     sensor_id: Uuid,
 }
@@ -17,20 +17,20 @@ impl Config {
     pub fn build(args: &[String]) -> Result<Config, &'static str> {
         match args.len() {
             2 => {
-                let frequency = args[1]
-                    .parse::<u8>()
-                    .map_err(|_| "<frequency> needs to be between 0-255.")?;
+                let frequency_ms = args[1]
+                    .parse::<u32>()
+                    .map_err(|_| "<frequency_ms> must be a positive integer (milliseconds).")?;
 
                 let tcp_stream =
                     TcpStream::connect("127.0.0.1:8080").map_err(|_| "Error connecting via Tcp")?;
 
                 Ok(Config {
-                    frequency,
+                    frequency_ms,
                     tcp_stream,
                     sensor_id: Uuid::new_v4(),
                 })
             }
-            _ => Err("Usage: <frequency>"),
+            _ => Err("Usage: sensor <frequency_ms>"),
         }
     }
 }
@@ -49,16 +49,20 @@ fn main() -> std::io::Result<()> {
 }
 
 fn run(config: &mut Config) -> std::io::Result<()> {
+    // One full orbit in 30 seconds. dt advances t by one tick's worth of angle.
+    let dt = TAU / (30_000.0 / config.frequency_ms as f32);
+    let mut t: f32 = rand::random_range(0.0..TAU);
+
     loop {
-        let reading = generate_uav_reading(config.sensor_id);
+        let reading = generate_uav_reading(config.sensor_id, t);
         let json = serde_json::to_vec(&reading)?;
         let len = json.len() as u32;
 
         config.tcp_stream.write_all(&len.to_be_bytes())?;
         config.tcp_stream.write_all(&json)?;
 
-        let duration = Duration::new(config.frequency as u64, 0);
-        sleep(duration);
+        t = (t + dt) % TAU;
+        sleep(Duration::from_millis(config.frequency_ms as u64));
     }
 }
 
@@ -84,15 +88,15 @@ mod tests {
     fn build_rejects_non_numeric_frequency() {
         assert!(matches!(
             Config::build(&args(&["sensor", "fast"])),
-            Err("<frequency> needs to be between 0-255.")
+            Err("<frequency_ms> must be a positive integer (milliseconds).")
         ));
     }
 
     #[test]
-    fn build_rejects_frequency_out_of_range() {
+    fn build_rejects_negative_frequency() {
         assert!(matches!(
-            Config::build(&args(&["sensor", "256"])),
-            Err("<frequency> needs to be between 0-255.")
+            Config::build(&args(&["sensor", "-1"])),
+            Err("<frequency_ms> must be a positive integer (milliseconds).")
         ));
     }
 }
