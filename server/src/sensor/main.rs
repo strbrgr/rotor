@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use crate::reading::generate_uav_reading;
 use std::{
-    env, io::Write, net::TcpStream, process::exit, thread::sleep, time::Duration,
+    env, f32::consts::TAU, io::Write, net::TcpStream, process::exit, thread::sleep, time::Duration,
 };
 
 pub mod reading;
@@ -49,14 +49,19 @@ fn main() -> std::io::Result<()> {
 }
 
 fn run(config: &mut Config) -> std::io::Result<()> {
+    // One full orbit in 30 seconds. dt advances t by one tick's worth of angle.
+    let dt = TAU / (30_000.0 / config.frequency_ms as f32);
+    let mut t: f32 = rand::random_range(0.0..TAU);
+
     loop {
-        let reading = generate_uav_reading(config.sensor_id);
+        let reading = generate_uav_reading(config.sensor_id, t);
         let json = serde_json::to_vec(&reading)?;
         let len = json.len() as u32;
 
         config.tcp_stream.write_all(&len.to_be_bytes())?;
         config.tcp_stream.write_all(&json)?;
 
+        t = (t + dt) % TAU;
         sleep(Duration::from_millis(config.frequency_ms as u64));
     }
 }
