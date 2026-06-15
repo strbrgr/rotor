@@ -49,8 +49,8 @@ fn main() -> std::io::Result<()> {
 }
 
 fn run(config: &mut Config) -> std::io::Result<()> {
-    // One full orbit in 30 seconds. dt advances t by one tick's worth of angle.
-    let dt = TAU / (30_000.0 / config.frequency_ms as f32);
+    // One full orbit in 10 seconds. dt advances t by one tick's worth of angle.
+    let dt = TAU / (10_000.0 / config.frequency_ms as f32);
     let mut t: f32 = rand::random_range(0.0..TAU);
 
     loop {

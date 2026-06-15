@@ -94,33 +94,38 @@ flowchart LR
 
 ## Running
 
-**UI**
-
 ```bash
-cd ui
-npm install
-npm run dev
+./start.sh
 ```
 
-**Server** — run each in a separate terminal:
+That's it. The script starts everything in order and shuts it all down on `Ctrl+C`:
+
+1. Docker services (Iggy + QuestDB)
+2. Gateway → Writer + SSE server → two sensor instances
+3. Vite dev server (`http://localhost:5173`)
+
+The env vars are sourced from `server/.env`, so no extra setup is needed after the initial configuration step above.
+
+---
+
+**Manual startup** — if you need to run processes individually:
 
 ```bash
-# 1. Gateway — listens on 127.0.0.1:8080, forwards to Iggy
-cargo run --bin gateway
+# Docker
+docker compose -f server/docker-compose.yml --env-file server/.env up -d
 
-# 2. Writer — polls Iggy, writes to QuestDB
-cargo run --bin writer
+# Server (each in a separate terminal, from repo root)
+cargo run --manifest-path server/Cargo.toml --bin gateway
+cargo run --manifest-path server/Cargo.toml --bin writer
+cargo run --manifest-path server/Cargo.toml --bin sse
+cargo run --manifest-path server/Cargo.toml --bin sensor -- 100
+cargo run --manifest-path server/Cargo.toml --bin sensor -- 150
 
-# 3. SSE — polls Iggy, serves Server-Sent Events on 127.0.0.1:3001
-cargo run --bin sse
-
-# 4. Sensor(s) — each instance connects to the gateway and emits readings
-# Usage: sensor <frequency_ms>
-cargo run --bin sensor 100
-cargo run --bin sensor 150
+# UI
+cd ui && npm install && npm run dev
 ```
 
-The gateway batches every 10 readings into a single Iggy publish. Each sensor spawns with a unique UUID that identifies its readings for the lifetime of the process.
+Each sensor spawns with a unique UUID that identifies its readings for the lifetime of the process.
 
 ## Resetting state
 
