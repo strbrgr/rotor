@@ -118,7 +118,6 @@ async fn consume_messages(
                 Err(e) => error!("Failed to deserialize message: {e}"),
             }
         }
-        sleep(interval).await;
     }
 }
 
