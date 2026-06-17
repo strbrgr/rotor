@@ -1,5 +1,5 @@
 [package]
-name = "sensor_scenario"
+name = "rotor-server"
 version = "0.1.0"
 edition = "2024"
 
