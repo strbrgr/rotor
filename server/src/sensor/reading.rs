@@ -1,4 +1,4 @@
-use sensor_scenario::UavReading;
+use rotor_server::UavReading;
 use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 

@@ -1,6 +1,6 @@
 use iggy::prelude::*;
 use questdb::ingress::{Buffer, Sender, TimestampNanos};
-use sensor_scenario::{UavReading, iggy::IggyConfig};
+use rotor_server::{UavReading, iggy::IggyConfig};
 use std::env;
 use std::error::Error;
 use std::time::Duration;
