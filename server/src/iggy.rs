@@ -7,6 +7,7 @@ pub struct IggyConfig {
     pub stream_name: String,
     pub topic_name: String,
     pub partition_id: u32,
+    pub server_address: String,
 }
 
 impl IggyConfig {
@@ -24,11 +25,16 @@ impl IggyConfig {
                 .map_err(|_| "IGGY_PARTITION_ID must be set (see .env)")?
                 .parse::<u32>()
                 .map_err(|_| "IGGY_PARTITION_ID must be a valid u32")?,
+            server_address: env::var("IGGY_SERVER_ADDRESS")
+                .unwrap_or_else(|_| "127.0.0.1:8090".to_string()),
         })
     }
 
     pub async fn connect(&self) -> Result<IggyClient, Box<dyn Error>> {
-        let client = IggyClient::default();
+        let client = IggyClient::builder()
+            .with_tcp()
+            .with_server_address(self.server_address.clone())
+            .build()?;
         client.connect().await?;
         client
             .login_user(&self.root_username, &self.root_password)

@@ -21,8 +21,10 @@ impl Config {
                     .parse::<u32>()
                     .map_err(|_| "<frequency_ms> must be a positive integer (milliseconds).")?;
 
-                let tcp_stream =
-                    TcpStream::connect("127.0.0.1:8080").map_err(|_| "Error connecting via Tcp")?;
+                let gateway_address = env::var("GATEWAY_ADDRESS")
+                    .unwrap_or_else(|_| "127.0.0.1:8080".to_string());
+                let tcp_stream = TcpStream::connect(gateway_address)
+                    .map_err(|_| "Error connecting via Tcp")?;
 
                 Ok(Config {
                     frequency_ms,

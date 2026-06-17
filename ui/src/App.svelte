@@ -33,7 +33,7 @@
   ];
 
   const TRAIL_LEN = 90;
-  const SSE_URL = 'http://127.0.0.1:3001/events';
+  const SSE_URL = import.meta.env.VITE_SSE_URL ?? 'http://127.0.0.1:3001/events';
 
   let canvas: HTMLCanvasElement;
   let uavs = $state<Record<string, UavState>>({});

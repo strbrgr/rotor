@@ -18,6 +18,7 @@ struct Config {
     stream_name: Arc<str>,
     topic_name: Arc<str>,
     partition_id: u32,
+    server_address: String,
 }
 
 impl Config {
@@ -37,6 +38,8 @@ impl Config {
                 .map_err(|_| "IGGY_PARTITION_ID must be set (see .env)")?
                 .parse::<u32>()
                 .map_err(|_| "IGGY_PARTITION_ID must be a valid u32")?,
+            server_address: env::var("IGGY_SERVER_ADDRESS")
+                .unwrap_or_else(|_| "127.0.0.1:8090".to_string()),
         })
     }
 }
@@ -47,7 +50,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tracing_subscriber::fmt::init();
 
     let config = Arc::new(Config::from_env()?);
-    let client = Arc::new(IggyClient::default());
+    let client = Arc::new(
+        IggyClient::builder()
+            .with_tcp()
+            .with_server_address(config.server_address.clone())
+            .build()?,
+    );
     client.connect().await?;
     client
         .login_user(&config.root_username, &config.root_password)
