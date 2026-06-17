@@ -5,7 +5,7 @@ use axum::{
     routing::get,
 };
 use iggy::prelude::*;
-use sensor_scenario::{UavReading, iggy::IggyConfig};
+use rotor_server::{UavReading, iggy::IggyConfig};
 use std::{convert::Infallible, error::Error, sync::Arc, time::Duration};
 use tokio::sync::broadcast;
 use tokio::time::sleep;
