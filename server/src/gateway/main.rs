@@ -5,7 +5,7 @@ use iggy::prelude::{
     IggyExpiry, IggyMessage, MaxTopicSize, MessageClient, Partitioning, StreamClient, TopicClient,
     UserClient,
 };
-use sensor_scenario::UavReading;
+use rotor_server::UavReading;
 use tokio::{
     io::AsyncReadExt,
     net::{TcpListener, TcpStream},
